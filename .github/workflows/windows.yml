@@ -1,0 +1,89 @@
+name: Build and Pack Assets (MSVC & Clang with Sanitizers)
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  # =========================================================================
+  # 1. JOB: NATIVE MSVC COMPILATION (64-BIT / x64)
+  # =========================================================================
+  build-msvc-x64:
+    name: Windows (MSVC - x64)
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Build with MSVC (RelWithDebInfo x64)
+      run: msbuild EccEdc.sln /p:Configuration=RelWithDebInfo /p:Platform=x64
+
+    - name: Pack MSVC x64 Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: EccEdc-Windows-MSVC-x64
+        path: |
+          x64/RelWithDebInfo/*.exe
+          x64/RelWithDebInfo/*.pdb
+          README.md
+
+  # =========================================================================
+  # 2. JOB: NATIVE MSVC COMPILATION (32-BIT / x86)
+  # =========================================================================
+  build-msvc-x86:
+    name: Windows (MSVC - x86)
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Build with MSVC (RelWithDebInfo x86)
+      run: msbuild EccEdc.sln /p:Configuration=RelWithDebInfo /p:Platform=x86
+
+    - name: Pack MSVC x86 Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: EccEdc-Windows-MSVC-x86
+        path: |
+          RelWithDebInfo/*.exe
+          RelWithDebInfo/*.pdb
+          README.md
+
+  # =========================================================================
+  # 3. JOB: CLANG-CL COMPILATION WITH ASAN + UBSAN
+  # =========================================================================
+  build-clang-cl:
+    name: Windows (Clang-CL - MSBuild)
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v2
+
+    # /p:PlatformToolset=LLVM_v143_clangcl forces MSBuild to swap MSVC for Clang.
+    # /p:AdditionalOptions injects AddressSanitizer and UndefinedBehaviorSanitizer flags.
+    - name: Build with Clang-CL (Sanitizers + RelWithDebInfo x64)
+      run: |
+        msbuild EccEdc.sln /p:Configuration=RelWithDebInfo /p:Platform=x64 /p:PlatformToolset=LLVM_v143_clangcl /p:AdditionalOptions="-fsanitize=address -fsanitize=undefined"
+
+    - name: Pack Clang-CL Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: EccEdc-Windows-ClangCL-Sanitizers-x64
+        path: |
+          x64/RelWithDebInfo/*.exe
+          x64/RelWithDebInfo/*.pdb
+          README.md
