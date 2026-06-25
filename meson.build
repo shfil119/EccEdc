@@ -26,7 +26,7 @@ src_files = files(
 
 )
 
-all_sources = [src_files, builddatetime_h]
+all_sources = [src_files]
 
 executable(
   meson.project_name(),
