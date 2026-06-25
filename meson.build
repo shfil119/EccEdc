@@ -28,6 +28,8 @@ src_files = files(
 
 all_sources = [src_files]
 
+inc = [include_directories('EccEdc/'), include_directories('EccEdc/_external')]
+
 executable(
   meson.project_name(),
   sources: [
