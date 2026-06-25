@@ -1,4 +1,4 @@
-name: Windows build
+name: Windows Test Build
 
 on:
   push:
@@ -26,12 +26,14 @@ jobs:
     - name: Install Meson and Ninja
       run: pip install meson ninja
 
+    # Automatically and correctly configures x64 MSVC environment variables
+    - name: Initialize MSVC x64 Environment
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: x64
+
     - name: Build with MSVC (x64)
-      shell: cmd
       run: |
-        :: Initialize 64-bit MSVC Environment variables
-        call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
-        :: Setup build directory with optimization + debug info
         meson setup build_x64 --buildtype=debugoptimized --backend=ninja
         meson compile -C build_x64
 
@@ -63,12 +65,14 @@ jobs:
     - name: Install Meson and Ninja
       run: pip install meson ninja
 
+    # Automatically and correctly configures x86 (32-bit) MSVC environment variables
+    - name: Initialize MSVC x86 Environment
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: x86
+
     - name: Build with MSVC (x86)
-      shell: cmd
       run: |
-        :: Initialize 32-bit MSVC Environment variables
-        call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars32.bat"
-        :: Setup build directory for 32-bit compilation
         meson setup build_x86 --buildtype=debugoptimized --backend=ninja
         meson compile -C build_x86
 
@@ -100,13 +104,20 @@ jobs:
     - name: Install Meson and Ninja
       run: pip install meson ninja
 
+    # Clang-cl still requires Windows SDK headers from the MSVC environment
+    - name: Initialize MSVC x64 Environment for Clang
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: x64
+
+    # Fix: We set CC and CXX environment variables using standard shell syntax
+    # before running the 'meson setup' command
     - name: Build with Clang-CL (Sanitizers x64)
       shell: cmd
       run: |
-        :: Initialize MSVC SDK Environment variables first
-        call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
-        :: Force Meson to use clang-cl instead of cl
-        meson setup build_clang --buildtype=debugoptimized --backend=ninja --cc=clang-cl --cxx=clang-cl
+        set CC=clang-cl
+        set CXX=clang-cl
+        meson setup build_clang --buildtype=debugoptimized --backend=ninja
         meson compile -C build_clang
 
     - name: Pack Clang-CL Artifacts

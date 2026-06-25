@@ -1,15 +1,17 @@
 #ifndef _STRING_UTILS_HPP_
 #define _STRING_UTILS_HPP_
 
+#include <string>
+
 namespace StringUtils {
-	BOOL startsWith(const std::wstring & str, const std::wstring & lookFor);
-	BOOL startsWith(const std::string & str, const std::string & lookFor);
-	BOOL endsWith(const std::wstring & str, const std::wstring & lookFor);
-	BOOL endsWith(const std::string & str, const std::string & lookFor);
-	BOOL equals(const std::wstring & str, const std::wstring & other);
-	BOOL equals(const std::string & str, const std::string & other);
-	BOOL contains(const std::wstring & str, const std::wstring & lookFor);
-	BOOL contains(const std::string & str, const std::string & lookFor);
+	bool startsWith(const std::wstring & str, const std::wstring & lookFor);
+	bool startsWith(const std::string & str, const std::string & lookFor);
+	bool endsWith(const std::wstring & str, const std::wstring & lookFor);
+	bool endsWith(const std::string & str, const std::string & lookFor);
+	bool equals(const std::wstring & str, const std::wstring & other);
+	bool equals(const std::string & str, const std::string & other);
+	bool contains(const std::wstring & str, const std::wstring & lookFor);
+	bool contains(const std::string & str, const std::string & lookFor);
 
 	std::string getDirectoryFromPath(const std::string & filePath);
 

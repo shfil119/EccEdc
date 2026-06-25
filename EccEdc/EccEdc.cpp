@@ -21,13 +21,13 @@
 #include "Enum.h"
 #include "_external/ecm.h"
 
-static UINT check_fix_mode_s_startLBA = 0;
-static UINT check_fix_mode_s_endLBA = 0;
-static BYTE write_mode_s_Minute = 0;
-static BYTE write_mode_s_Second = 0;
-static BYTE write_mode_s_Frame = 0;
+static uint32_t check_fix_mode_s_startLBA = 0;
+static uint32_t check_fix_mode_s_endLBA = 0;
+static uint8_t write_mode_s_Minute = 0;
+static uint8_t write_mode_s_Second = 0;
+static uint8_t write_mode_s_Frame = 0;
 static SectorType write_mode_s_Mode = Nothing;
-static DWORD write_mode_s_MaxRoop = 0;
+static uint32_t write_mode_s_MaxRoop = 0;
 static FILE *fpLog;
 
 typedef struct _ERROR_STRUCT {
@@ -110,14 +110,14 @@ VOID OutputLastErrorNumAndString(
 #endif
 }
 
-BOOL IsValidDataHeader(
+bool IsValidDataHeader(
 	LPBYTE lpSrc
 ) {
 	BYTE aHeader[] = {
 		0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
 		0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00
 	};
-	BOOL bRet = TRUE;
+	bool bRet = true;
 	for (size_t c = 0; c < sizeof(aHeader); c++) {
 		if (lpSrc[c] != aHeader[c]) {
 			bRet = FALSE;
@@ -127,22 +127,22 @@ BOOL IsValidDataHeader(
 	return bRet;
 }
 
-BOOL IsScrambledDataHeader(
+bool IsScrambledDataHeader(
 	LPBYTE lpSrc
 ) {
-	BOOL bRet = FALSE;
+	bool bRet = FALSE;
 	if (IsValidDataHeader(lpSrc)) {
 		if ((lpSrc[0xf] & 0x60)) {
-			bRet = TRUE;
+			bRet = true;
 		}
 	}
 	return bRet;
 }
 
-BOOL IsErrorSector(
+bool IsErrorSector(
 	LPBYTE lpSrc
 ) {
-	BOOL bRet = FALSE;
+	bool bRet = FALSE;
 	INT cnt = 0;
 	if (IsValidDataHeader(lpSrc)) {
 		for (INT i = 16; i < CD_RAW_SECTOR_SIZE; i++) {
@@ -151,7 +151,7 @@ BOOL IsErrorSector(
 			}
 		}
 		if (cnt == 2336) {
-			bRet = TRUE;
+			bRet = true;
 		}
 	}
 	return bRet;
@@ -314,7 +314,7 @@ INT initCountNum(
 		OutputLastErrorNumAndString(__FUNCTION__, __LINE__);
 		return FALSE;
 	}
-	return TRUE;
+	return true;
 }
 
 VOID terminateCountNum(
@@ -340,11 +340,11 @@ INT handleCheckDetail(
 	PERROR_STRUCT pErrStruct,
 	EXEC_TYPE execType,
 	LPBYTE buf,
-	BOOL skipTrackModeCheck,
+	bool skipTrackModeCheck,
 	TrackMode trackMode,
 	UINT roopCnt,
 	UINT roopCnt2,
-	BOOL bSub,
+	bool bSub,
 	LPBYTE subBuf
 ) {
 #ifndef _WIN32
@@ -354,7 +354,7 @@ INT handleCheckDetail(
 	if (IsErrorSector(buf)) {
 		OutputFileWithLbaMsf("2336 bytes have been already replaced at 0x55\n", roopCnt, roopCnt, buf[12], buf[13], buf[14]);
 		pErrStruct->errorNum[pErrStruct->cnt_SectorFilled55++] = roopCnt;
-		return TRUE;
+		return true;
 	}
 
 	TrackMode trackModeLocal = TrackModeUnknown;
@@ -428,7 +428,7 @@ INT handleCheckDetail(
 		sectorType == Mode2 || sectorType == InvalidMode2 ||
 		sectorType == Mode2Form1SubheaderNotSame ||	sectorType == Mode2Form2SubheaderNotSame ||
 		sectorType == Mode2SubheaderNotSame || sectorType == Mode2WithBlockIndicators) {
-		BOOL bNoEdc = FALSE;
+		bool bNoEdc = FALSE;
 
 		OutputFileWithLbaMsf("mode 2", roopCnt, roopCnt, buf[12], buf[13], buf[14]);
 		if (sectorType == Mode2Form1) {
@@ -450,7 +450,7 @@ INT handleCheckDetail(
 		}
 		else if (sectorType == Mode2) {
 			OutputFile(" no edc, ");
-			bNoEdc = TRUE;
+			bNoEdc = true;
 		}
 		else if (sectorType == InvalidMode2) {
 			OutputFile(" Invalid mode 2: [%02x] ", buf[15]);
@@ -506,19 +506,19 @@ INT handleCheckDetail(
 			OutputFile(", Trigger");
 		}
 
-		BOOL bAudio = FALSE;
-		BOOL bVideo = FALSE;
+		bool bAudio = FALSE;
+		bool bVideo = FALSE;
 
 		if (buf[18] & 0x08) {
 			OutputFile(", Data");
 		}
 		else if (buf[18] & 0x04) {
 			OutputFile(", Audio");
-			bAudio = TRUE;
+			bAudio = true;
 		}
 		else if (buf[18] & 0x02) {
 			OutputFile(", Video");
-			bVideo = TRUE;
+			bVideo = true;
 		}
 
 		if (buf[18] & 0x01) {
@@ -653,7 +653,7 @@ INT handleCheckDetail(
 		}
 #endif
 	}
-	return TRUE;
+	return true;
 }
 
 INT handleCheckOrFix(
@@ -724,7 +724,7 @@ INT handleCheckOrFix(
 		endLBA = roopSize;
 	}
 
-	BOOL skipTrackModeCheck = targetTrackMode == TrackModeUnknown;
+	bool skipTrackModeCheck = targetTrackMode == TrackModeUnknown;
 	TrackMode trackMode = targetTrackMode;
 	UINT j = 0;
 	BYTE prevCtl = 0;
@@ -733,7 +733,7 @@ INT handleCheckOrFix(
 	INT nFirstLBA = 0;
 	INT nLBA = 0;
 	INT nPrevLBA = 0;
-	BOOL bBadMsf = FALSE;
+	bool bBadMsf = FALSE;
 
 	BYTE buf[CD_RAW_SECTOR_SIZE] = {};
 	typedef struct _TRACK_DATA {
@@ -755,7 +755,7 @@ INT handleCheckOrFix(
 	INT nTrkIdx = 0;
 	UINT n1stLBAinToc[100] = {};
 	UCHAR nCtlinToc[100] = {};
-	BOOL bSecuROM = FALSE;
+	bool bSecuROM = FALSE;
 	UINT nSecuROMSector = 0;
 
 	if (!strncmp(pszType, "TOC", 3)) {
@@ -822,11 +822,11 @@ INT handleCheckOrFix(
 				}
 
 				if (m == BcdToDec(buf[12]) && s == BcdToDec(buf[13]) && f == BcdToDec(buf[14])) {
-					handleCheckDetail(&errStruct, execType, buf, skipTrackModeCheck, trackMode, (UINT)nLBA, j, TRUE, subbuf);
+					handleCheckDetail(&errStruct, execType, buf, skipTrackModeCheck, trackMode, (UINT)nLBA, j, true, subbuf);
 				}
 				else if (nLBA > 0 && (prevCtl & 0x04) && nPrevLBA + 1 != nLBA) {
 					errStruct.badMsfNum[errStruct.cnt_BadMsf++] = i;
-					bBadMsf = TRUE;
+					bBadMsf = true;
 					OutputFileWithLbaMsf("bad msf\n", nPrevLBA + 1, nPrevLBA + 1, buf[12], buf[13], buf[14]);
 				}
 				else {
@@ -834,7 +834,7 @@ INT handleCheckOrFix(
 						// for audio sector of data track
 						nLBA = nPrevLBA + 1;
 					}
-					handleCheckDetail(&errStruct, execType, buf, skipTrackModeCheck, trackMode, (UINT)nLBA, j, TRUE, subbuf);
+					handleCheckDetail(&errStruct, execType, buf, skipTrackModeCheck, trackMode, (UINT)nLBA, j, true, subbuf);
 				}
 			}
 			else {
@@ -860,14 +860,14 @@ INT handleCheckOrFix(
 			// last sector
 			if (((byCtl & 0x04) == 0x04) && prevMode[0] == prevMode[1] &&
 				prevMode[0] == prevMode[2] && prevMode[0] != prevMode[3]) {
-				bSecuROM = TRUE;
+				bSecuROM = true;
 				tmplba = roopSize - 4;
 			}
 		}
 		else {
 			if (((prevCtl & 0x04) == 0x04) && prevMode[0] == 0 && prevMode[1] == prevMode[2] &&
 				prevMode[1] == prevMode[3] && prevMode[1] != prevMode[4] && prevMode[1] == prevMode[5]) {
-				bSecuROM = TRUE;
+				bSecuROM = true;
 				tmplba = i - 4;
 			}
 		}
@@ -1320,7 +1320,7 @@ INT checkArg(
 	PEXEC_TYPE pExecType
 ) {
 	PCHAR endptr = NULL;
-	INT ret = TRUE;
+	INT ret = true;
 
 	if (argc == 4 && (!strcmp(argv[1], "check"))) {
 		*pExecType = check;

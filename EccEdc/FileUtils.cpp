@@ -1,7 +1,7 @@
 #include "FileUtils.hpp"
 
 namespace FileUtils {
-	BOOL readFileLines(LPCSTR filePath, std::vector<std::string> & lines) {
+	bool readFileLines(const char* filePath, std::vector<std::string> & lines) {
 		std::ifstream infile(filePath);
 		if (!infile.is_open())
 			return FALSE;
@@ -12,11 +12,11 @@ namespace FileUtils {
 			lines.push_back(line);
 		}
 
-		return TRUE;
+		return true;
 	}
 
-	BOOL getFileSize(LPCSTR filePath, ULONG & fileSize) {
-		BOOL retVal = FALSE;
+	bool getFileSize(const char* filePath, uint32_t & fileSize) {
+		bool retVal = FALSE;
 
 		HANDLE fileHandle = CreateFile(filePath, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 		if (fileHandle != INVALID_HANDLE_VALUE) {

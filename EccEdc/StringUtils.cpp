@@ -1,62 +1,62 @@
 #include "StringUtils.hpp"
 
 namespace StringUtils {
-	BOOL startsWith(const std::wstring & str, const std::wstring & lookFor) {
+	bool startsWith(const std::wstring & str, const std::wstring & lookFor) {
 		if (lookFor.size() > str.size())
-			return FALSE;
+			return false;
 
 		return !StrCmpNIW(str.c_str(), lookFor.c_str(), (int)lookFor.size());
 	}
 
-	BOOL startsWith(const std::string & str, const std::string & lookFor) {
+	bool startsWith(const std::string & str, const std::string & lookFor) {
 		if (lookFor.size() > str.size())
-			return FALSE;
+			return false;
 
 		return !StrCmpNI(str.c_str(), lookFor.c_str(), (int)lookFor.size());
 	}
 
-	BOOL endsWith(const std::wstring & str, const std::wstring & lookFor) {
+	bool endsWith(const std::wstring & str, const std::wstring & lookFor) {
 		if (lookFor.size() > str.size())
-			return FALSE;
+			return false;
 
-		SIZE_T offset = str.size() - lookFor.size();
+		size_t offset = str.size() - lookFor.size();
 
 		return !StrCmpNIW(str.c_str() + offset, lookFor.c_str(), (int)lookFor.size());
 	}
 
-	BOOL endsWith(const std::string & str, const std::string & lookFor) {
+	bool endsWith(const std::string & str, const std::string & lookFor) {
 		if (lookFor.size() > str.size())
-			return FALSE;
+			return false;
 
-		SIZE_T offset = str.size() - lookFor.size();
+		size_t offset = str.size() - lookFor.size();
 
 		return !StrCmpNI(str.c_str() + offset, lookFor.c_str(), (int)lookFor.size());
 	}
 
-	BOOL equals(const std::wstring & str, const std::wstring & other) {
+	bool equals(const std::wstring & str, const std::wstring & other) {
 		if (str.size() != other.size())
-			return FALSE;
+			return false;
 
 		return !_wcsicmp(str.c_str(), other.c_str());
 	}
 
-	BOOL equals(const std::string & str, const std::string & other) {
+	bool equals(const std::string & str, const std::string & other) {
 		if (str.size() != other.size())
-			return FALSE;
+			return false;
 
 		return !_stricmp(str.c_str(), other.c_str());
 	}
 
-	BOOL contains(const std::wstring & str, const std::wstring & lookFor) {
+	bool contains(const std::wstring & str, const std::wstring & lookFor) {
 		if (lookFor.size() > str.size())
-			return FALSE;
+			return false;
 
 		return StrStrIW(str.c_str(), lookFor.c_str()) != NULL;
 	}
 
-	BOOL contains(const std::string & str, const std::string & lookFor) {
+	bool contains(const std::string & str, const std::string & lookFor) {
 		if (lookFor.size() > str.size())
-			return FALSE;
+			return false;
 
 		return StrStrI(str.c_str(), lookFor.c_str()) != NULL;
 	}
