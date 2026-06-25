@@ -14,6 +14,8 @@ Global
 		{D29F043A-86A8-4B4C-A59F-CB498F91A35E}.Debug|Win32.Build.0 = Debug|Win32
 		{D29F043A-86A8-4B4C-A59F-CB498F91A35E}.Release|Win32.ActiveCfg = Release|Win32
 		{D29F043A-86A8-4B4C-A59F-CB498F91A35E}.Release|Win32.Build.0 = Release|Win32
+		{D29F043A-86A8-4B4C-A59F-CB498F91A35E}.RelWithDebInfo|Win32.ActiveCfg = RelWithDebInfo|Win32
+		{D29F043A-86A8-4B4C-A59F-CB498F91A35E}.RelWithDebInfo|Win32.Build.0 = RelWithDebInfo|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
