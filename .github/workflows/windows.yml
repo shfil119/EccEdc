@@ -1,4 +1,4 @@
-name: Build and Pack Assets (MSVC & Clang with Sanitizers)
+name: Windows build
 
 on:
   push:
@@ -18,19 +18,30 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v5
 
-    - name: Add MSBuild to PATH
-      uses: microsoft/setup-msbuild@v2
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'
 
-    - name: Build with MSVC (RelWithDebInfo x64)
-      run: msbuild EccEdc.sln /p:Configuration=RelWithDebInfo /p:Platform=x64
+    - name: Install Meson and Ninja
+      run: pip install meson ninja
+
+    - name: Build with MSVC (x64)
+      shell: cmd
+      run: |
+        :: Initialize 64-bit MSVC Environment variables
+        call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+        :: Setup build directory with optimization + debug info
+        meson setup build_x64 --buildtype=debugoptimized --backend=ninja
+        meson compile -C build_x64
 
     - name: Pack MSVC x64 Artifacts
       uses: actions/upload-artifact@v4
       with:
         name: EccEdc-Windows-MSVC-x64
         path: |
-          x64/RelWithDebInfo/*.exe
-          x64/RelWithDebInfo/*.pdb
+          build_x64/*.exe
+          build_x64/*.pdb
           README.md
 
   # =========================================================================
@@ -44,46 +55,65 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v5
 
-    - name: Add MSBuild to PATH
-      uses: microsoft/setup-msbuild@v2
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'
 
-    - name: Build with MSVC (RelWithDebInfo x86)
-      run: msbuild EccEdc.sln /p:Configuration=RelWithDebInfo /p:Platform=x86
+    - name: Install Meson and Ninja
+      run: pip install meson ninja
+
+    - name: Build with MSVC (x86)
+      shell: cmd
+      run: |
+        :: Initialize 32-bit MSVC Environment variables
+        call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars32.bat"
+        :: Setup build directory for 32-bit compilation
+        meson setup build_x86 --buildtype=debugoptimized --backend=ninja
+        meson compile -C build_x86
 
     - name: Pack MSVC x86 Artifacts
       uses: actions/upload-artifact@v4
       with:
         name: EccEdc-Windows-MSVC-x86
         path: |
-          RelWithDebInfo/*.exe
-          RelWithDebInfo/*.pdb
+          build_x86/*.exe
+          build_x86/*.pdb
           README.md
 
   # =========================================================================
   # 3. JOB: CLANG-CL COMPILATION WITH ASAN + UBSAN
   # =========================================================================
   build-clang-cl:
-    name: Windows (Clang-CL - MSBuild)
+    name: Windows (Clang-CL - x64)
     runs-on: windows-latest
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v5
 
-    - name: Add MSBuild to PATH
-      uses: microsoft/setup-msbuild@v2
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'
 
-    # /p:PlatformToolset=LLVM_v143_clangcl forces MSBuild to swap MSVC for Clang.
-    # /p:AdditionalOptions injects AddressSanitizer and UndefinedBehaviorSanitizer flags.
-    - name: Build with Clang-CL (Sanitizers + RelWithDebInfo x64)
+    - name: Install Meson and Ninja
+      run: pip install meson ninja
+
+    - name: Build with Clang-CL (Sanitizers x64)
+      shell: cmd
       run: |
-        msbuild EccEdc.sln /p:Configuration=RelWithDebInfo /p:Platform=x64 /p:PlatformToolset=LLVM_v143_clangcl /p:AdditionalOptions="-fsanitize=address -fsanitize=undefined"
+        :: Initialize MSVC SDK Environment variables first
+        call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+        :: Force Meson to use clang-cl instead of cl
+        meson setup build_clang --buildtype=debugoptimized --backend=ninja --cc=clang-cl --cxx=clang-cl
+        meson compile -C build_clang
 
     - name: Pack Clang-CL Artifacts
       uses: actions/upload-artifact@v4
       with:
         name: EccEdc-Windows-ClangCL-Sanitizers-x64
         path: |
-          x64/RelWithDebInfo/*.exe
-          x64/RelWithDebInfo/*.pdb
+          build_clang/*.exe
+          build_clang/*.pdb
           README.md
