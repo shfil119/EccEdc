@@ -16,7 +16,7 @@ src_files = files(
   'EccEdc/FileUtils.cpp',
   'EccEdc/FileUtils.hpp',
   'EccEdc/stdafx.cpp',
-  'EccEdc/stdafx.hpp',
+  'EccEdc/stdafx.h',
   'EccEdc/StringUtils.cpp',
   'EccEdc/StringUtils.hpp',
   'EccEdc/targetver.h',
