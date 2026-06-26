@@ -1,0 +1,31 @@
+# =========================================================================
+# APPVEYOR CI CONFIGURATION (Visual Studio 2019 - Debug Win32)
+# =========================================================================
+
+# Precise image lock for the Visual Studio 2019 environment
+image: Visual Studio 2019
+
+# Set the build matrix to match your solution exactly
+configuration: Debug
+platform: Win32
+
+# Disable AppVeyor's default automatic solution building 
+# so we can fully control MSBuild arguments manually
+build:
+  project: EccEdc.sln
+  verbosity: minimal
+  # Options explanation:
+  # /p:PlatformToolset=v142              -> Forces the native VS2019 compiler
+  # /p:WindowsTargetPlatformVersion=10.0 -> Dynamically retargets from SDK 8.1 to modern Windows 10 SDK
+  options: /p:PlatformToolset=v142 /p:WindowsTargetPlatformVersion=10.0
+
+# Define which assets to collect and compress after a successful build
+artifacts:
+  - path: Debug\*.exe
+    name: EccEdc-Windows-MSVC-Win32-Debug
+  - path: Debug\*.pdb
+    name: EccEdc-Windows-MSVC-Win32-Debug-Symbols
+
+# Clean up before building (optional but recommended for a fresh start)
+before_build:
+  - echo Starting build for EccEdc on Visual Studio 2019...
