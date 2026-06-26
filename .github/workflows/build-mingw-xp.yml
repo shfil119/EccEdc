@@ -1,4 +1,4 @@
-name: Build Windows XP App with Meson
+name: Windows XP 32bit
 on:
   push:
     branches: [ main, master ]
@@ -7,18 +7,21 @@ on:
 
 jobs:
   build-for-xp:
-    # 1. Hostem jest nowoczesne i wspierane Ubuntu LTS
+    # Use a specific, stable modern Ubuntu release as the host runner
     runs-on: ubuntu-24.04
 
     steps:
-      # KROK 1: Pobieramy kod na hoście (Działa w 100% stabilnie)
+      # STEP 1: Fetch source code on the host environment
       - name: Checkout Source Code
         uses: actions/checkout@v4
 
-      # KROK 2: Kompilacja w kontenerze Ubuntu 14.04 przy użyciu Dockera.
+      # STEP 2: Isolate compilation tasks inside a safe legacy container
       - name: Compile Inside Safe Container
         run: |
           docker run --rm -v "${{ github.workspace }}:/work" -w /work ubuntu:14.04 /bin/bash -c "
+            echo '=== 1. Fix Legacy Ubuntu Repositories ==='
+            sed -i 's/://ubuntu.com' /etc/apt/sources.list
+            sed -i 's/://ubuntu.com' /etc/apt/sources.list
 
             echo '=== 2. Configure UTF-8 Locale ==='
             apt-get update
@@ -28,30 +31,31 @@ jobs:
             export LC_ALL=en_US.UTF-8
 
             echo '=== 3. Install Core Build Tools ==='
-            # Instalujemy podstawy (unzip i wget będą potrzebne do pobrania nowej wersji Ninja)
-            apt-get install -y build-essential mingw-w64 python3-pip git wget unzip
+            apt-get install -y build-essential mingw-w64 python3 git wget unzip
 
-            echo '=== 4. Download and Install Modern Ninja (v1.11.1) ==='
-            # Pobieramy oficjalne binarne wydanie Ninja, które bez problemu działa na Ubuntu 14.04
+            echo '=== 4. Download and Install Modern Ninja (v1.5.3) ==='
             wget https://github.com/ninja-build/ninja/releases/download/v1.5.3/ninja-linux.zip
             unzip ninja-linux.zip -d /usr/local/bin/
             chmod +x /usr/local/bin/ninja
-
-            # Weryfikacja wersji (zwróci 1.11.1, co w pełni zadowoli Mesona)
             ninja --version
 
-            echo '=== 5. Install Meson 0.44.1 ==='
-            pip3 install 'meson==0.44.1'
+            echo '=== 5. Download and Install Meson 0.44.1 via wget ==='
+            # Download the source archive directly from GitHub releases
+            wget https://github.com -O meson.zip
+            unzip meson.zip
+
+            # Create a symlink to expose the python entrypoint script as a global command
+            ln -sf $(pwd)/meson-0.44.1/meson.py /usr/bin/meson
+            meson --version
 
             echo '=== 6. Run Meson Setup ==='
-            # Teraz konfiguracja przejdzie pomyślnie, bo wykryje Ninja 1.11.1
             meson setup builddir --cross-file mingw-cross.txt -Denable_xp_compat=true
 
             echo '=== 7. Compile Using Native Ninja ==='
             ninja -C builddir
           "
 
-      # KROK 3: Zapisanie pliku .exe (Wykonuje się na hoście z folderu builddir)
+      # STEP 3: Save the generated Windows executable file as a workflow artifact
       - name: Upload Windows XP Binary
         uses: actions/upload-artifact@v4
         with:
