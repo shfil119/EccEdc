@@ -1,5 +1,9 @@
 name: Build Windows XP App with Meson
-on: [push, pull_request]
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
 
 jobs:
   build-for-xp:
@@ -25,7 +29,7 @@ jobs:
 
             echo '=== 4. Run Meson Setup and Compile ==='
             # Flaga --reconfigure pozwala na czyszczenie katalogu przy ponownych buildach
-            meson setup builddir --cross-file cross-mingw.txt -Denable_xp_compat=true
+            meson setup builddir --cross-file mingw-cross.txt -Denable_xp_compat=true
             meson compile -C builddir
           "
 
