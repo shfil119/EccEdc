@@ -18,14 +18,13 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v5
 
+    # Fixed: Rolled back from @v4 to the correct existing version @v3
     - name: Add MSBuild to PATH
-      uses: microsoft/setup-msbuild@v4
+      uses: microsoft/setup-msbuild@v3
 
-    # Using Configuration=Debug for 64-bit architecture
     - name: Build with MSVC (Debug x64)
       run: msbuild EccEdc.sln /p:Configuration=Debug /p:Platform=x64
 
-    # Packaging artifacts from the x64/Debug/ folder
     - name: Pack MSVC x64 Artifacts
       uses: actions/upload-artifact@v4
       with:
@@ -46,14 +45,13 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v5
 
+    # Fixed: Rolled back from @v4 to the correct existing version @v3
     - name: Add MSBuild to PATH
-      uses: microsoft/setup-msbuild@v4
+      uses: microsoft/setup-msbuild@v3
 
-    # Using Configuration=Debug for 32-bit architecture
     - name: Build with MSVC (Debug x86)
       run: msbuild EccEdc.sln /p:Configuration=Debug /p:Platform=x86
 
-    # Packaging artifacts from the root Debug/ folder for x86
     - name: Pack MSVC x86 Artifacts
       uses: actions/upload-artifact@v4
       with:
@@ -74,15 +72,14 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v5
 
+    # Fixed: Rolled back from @v4 to the correct existing version @v3
     - name: Add MSBuild to PATH
-      uses: microsoft/setup-msbuild@v4
+      uses: microsoft/setup-msbuild@v3
 
-    # Using Configuration=Debug, overriding the toolset to Clang, and passing Sanitizers
     - name: Build with Clang-CL (Sanitizers + Debug x64)
       run: |
         msbuild EccEdc.sln /p:Configuration=Debug /p:Platform=x64 /p:PlatformToolset=LLVM_v143_clangcl /p:AdditionalOptions="-fsanitize=address -fsanitize=undefined"
 
-    # Packaging artifacts from the x64/Debug/ folder for Clang
     - name: Pack Clang-CL Artifacts
       uses: actions/upload-artifact@v4
       with:
