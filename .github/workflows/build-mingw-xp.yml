@@ -37,8 +37,8 @@ jobs:
 
             echo '=== 4. Download and Install Meson 0.44.1 via wget ==='
             # Download the source archive directly from GitHub releases
-            wget https://github.com -O meson.zip
-            unzip meson.zip
+            wget https://github.com/mesonbuild/meson/releases/download/0.44.1/meson-0.44.1.tar.gz
+            tar -xf meson-0.44.1.tar.gz
 
             # Create a symlink to expose the python entrypoint script as a global command
             ln -sf $(pwd)/meson-0.44.1/meson.py /usr/bin/meson
