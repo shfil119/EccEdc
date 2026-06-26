@@ -16,21 +16,35 @@ jobs:
         uses: actions/checkout@v4
 
       # KROK 2: Kompilacja w kontenerze Ubuntu 14.04 przy użyciu Dockera.
-      # Wszystkie operacje (Apt, Pip, Meson) zamykamy w jednym bloku dockerowym.
       - name: Compile Inside Safe Container
         run: |
           docker run --rm -v "${{ github.workspace }}:/work" -w /work ubuntu:14.04 /bin/bash -c "
-            echo '=== 2. Install Build Tools ==='
+            echo '=== 1. Fix Legacy Repositories ==='
+            sed -i 's/://ubuntu.com' /etc/apt/sources.list
+            sed -i 's/://ubuntu.com' /etc/apt/sources.list
+
+            echo '=== 2. Configure UTF-8 Locale ==='
             apt-get update
+            apt-get install -y locales
+            locale-gen en_US.UTF-8
+            export LANG=en_US.UTF-8
+            export LC_ALL=en_US.UTF-8
+
+            echo '=== 3. Install Build Tools ==='
             apt-get install -y build-essential mingw-w64 python3-pip ninja-build
 
-            echo '=== 3. Install Meson 0.44.1 (Python 3.4 compatible) ==='
+            # Tworzymy link symboliczny, aby stary Meson widział komendę 'ninja'
+            ln -sf /usr/bin/ninja-build /usr/bin/ninja
+
+            echo '=== 4. Install Meson 0.44.1 ==='
             pip3 install 'meson==0.44.1'
 
-            echo '=== 4. Run Meson Setup and Compile ==='
-            # Flaga --reconfigure pozwala na czyszczenie katalogu przy ponownych buildach
-            meson setup builddir --cross-file mingw-cross.txt -Denable_xp_compat=true
-            meson compile -C builddir
+            echo '=== 5. Run Meson Setup ==='
+            meson setup builddir --cross-file mingw-cross.txt -Denable_xp_compat=true --reconfigure
+
+            echo '=== 6. Compile Using Native Ninja ==='
+            # W wersji Meson 0.44.1 kompilację uruchamia się bezpośrednio przez program ninja
+            ninja -C builddir
           "
 
       # KROK 3: Zapisanie pliku .exe (Wykonuje się na hoście z folderu builddir)
