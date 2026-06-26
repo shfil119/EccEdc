@@ -41,7 +41,7 @@ jobs:
             tar -xf meson-0.44.1.tar.gz
 
             # Create a symlink to expose the python entrypoint script as a global command
-            ln -sf $(pwd)/meson-0.44.1/meson.py /usr/bin/meson
+            ln -sf meson-0.44.1/meson.py /usr/bin/meson
             meson --version
 
             echo '=== 5. Run Meson Setup ==='
