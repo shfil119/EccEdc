@@ -40,7 +40,7 @@ jobs:
             pip3 install 'meson==0.44.1'
 
             echo '=== 5. Run Meson Setup ==='
-            meson setup builddir --cross-file mingw-cross.txt -Denable_xp_compat=true --reconfigure
+            meson setup builddir --cross-file mingw-cross.txt -Denable_xp_compat=true
 
             echo '=== 6. Compile Using Native Ninja ==='
             # W wersji Meson 0.44.1 kompilację uruchamia się bezpośrednio przez program ninja
