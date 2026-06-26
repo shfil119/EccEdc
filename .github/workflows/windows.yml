@@ -1,4 +1,4 @@
-name: Build and Pack Assets (MSBuild - Debug Configuration)
+name: Build and Pack Assets (MSBuild - Debug Configuration Win32)
 
 on:
   push:
@@ -8,83 +8,58 @@ on:
 
 jobs:
   # =========================================================================
-  # 1. JOB: NATIVE MSVC COMPILATION (64-BIT / x64)
+  # 1. JOB: NATIVE MSVC COMPILATION (32-BIT / Win32 Debug)
   # =========================================================================
-  build-msvc-x64:
-    name: Windows (MSVC - x64 Debug)
+  build-msvc-win32:
+    name: Windows (MSVC - Win32 Debug)
     runs-on: windows-latest
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v5
 
-    # Fixed: Rolled back from @v4 to the correct existing version @v3
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v3
 
-    - name: Build with MSVC (Debug x64)
-      run: msbuild EccEdc.sln /p:Configuration=Debug /p:Platform=x64
+    # CRITICAL FIX: Explicitly using Platform=Win32 to match the .sln file exactly
+    - name: Build with MSVC (Debug Win32)
+      run: msbuild EccEdc.sln /p:Configuration=Debug /p:Platform=Win32
 
-    - name: Pack MSVC x64 Artifacts
+    # Packaging artifacts from the root Debug/ folder
+    - name: Pack MSVC Win32 Artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: EccEdc-Windows-MSVC-x64-Debug
-        path: |
-          x64/Debug/*.exe
-          x64/Debug/*.pdb
-          README.md
-
-  # =========================================================================
-  # 2. JOB: NATIVE MSVC COMPILATION (32-BIT / x86)
-  # =========================================================================
-  build-msvc-x86:
-    name: Windows (MSVC - x86 Debug)
-    runs-on: windows-latest
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v5
-
-    # Fixed: Rolled back from @v4 to the correct existing version @v3
-    - name: Add MSBuild to PATH
-      uses: microsoft/setup-msbuild@v3
-
-    - name: Build with MSVC (Debug x86)
-      run: msbuild EccEdc.sln /p:Configuration=Debug /p:Platform=x86
-
-    - name: Pack MSVC x86 Artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: EccEdc-Windows-MSVC-x86-Debug
+        name: EccEdc-Windows-MSVC-Win32-Debug
         path: |
           Debug/*.exe
           Debug/*.pdb
           README.md
 
   # =========================================================================
-  # 3. JOB: CLANG-CL COMPILATION WITH ASAN + UBSAN
+  # 2. JOB: CLANG-CL COMPILATION WITH ASAN + UBSAN (32-BIT / Win32 Debug)
   # =========================================================================
-  build-clang-cl:
-    name: Windows (Clang-CL - x64 Debug)
+  build-clang-cl-win32:
+    name: Windows (Clang-CL - Win32 Debug)
     runs-on: windows-latest
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v5
 
-    # Fixed: Rolled back from @v4 to the correct existing version @v3
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v3
 
-    - name: Build with Clang-CL (Sanitizers + Debug x64)
+    # CRITICAL FIX: Explicitly using Platform=Win32 and configuring Clang toolset
+    - name: Build with Clang-CL (Sanitizers + Debug Win32)
       run: |
-        msbuild EccEdc.sln /p:Configuration=Debug /p:Platform=x64 /p:PlatformToolset=LLVM_v143_clangcl /p:AdditionalOptions="-fsanitize=address -fsanitize=undefined"
+        msbuild EccEdc.sln /p:Configuration=Debug /p:Platform=Win32 /p:PlatformToolset=LLVM_v143_clangcl /p:AdditionalOptions="-fsanitize=address -fsanitize=undefined"
 
-    - name: Pack Clang-CL Artifacts
+    # Packaging artifacts from the root Debug/ folder for Clang
+    - name: Pack Clang-CL Win32 Artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: EccEdc-Windows-ClangCL-Sanitizers-x64-Debug
+        name: EccEdc-Windows-ClangCL-Sanitizers-Win32-Debug
         path: |
-          x64/Debug/*.exe
-          x64/Debug/*.pdb
+          Debug/*.exe
+          Debug/*.pdb
           README.md
