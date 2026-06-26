@@ -12,14 +12,14 @@
 #pragma warning(disable: 4710 4711)
 #pragma warning(push)
 #pragma warning(disable: 4365 4464 4571 4625 4626 4668 4774 4820 5026 5027 5039)
-#include <Windows.h>
+#include <windows.h>
 
 #include <string>
 #include <cstdio>
 #include <cassert>
 #include <vector>
 
-#include <Shlwapi.h>
+#include <shlwapi.h>
 
 #include <algorithm>
 #include <functional>

@@ -1,3 +1,8 @@
+#ifdef _WIN32
+#include <windows.h>
+#include <shlwapi.h>
+#endif
+
 #include "StringUtils.hpp"
 
 namespace StringUtils {

@@ -14,7 +14,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 ////////////////////////////////////////////////////////////////////////////////
+#include <cassert>
 #ifdef _WIN32
+#include <windows.h>
 #include "StringUtils.hpp"
 #include "FileUtils.hpp"
 #endif
