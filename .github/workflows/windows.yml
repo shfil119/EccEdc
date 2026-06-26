@@ -12,7 +12,7 @@ jobs:
   # =========================================================================
   build-msvc-win32:
     name: Windows (MSVC - Win32 Debug)
-    runs-on: windows-latest
+    runs-on: windows-2022
 
     steps:
     - name: Checkout repository
@@ -40,7 +40,7 @@ jobs:
   # =========================================================================
   build-clang-cl-win32:
     name: Windows (Clang-CL - Win32 Debug)
-    runs-on: windows-latest
+    runs-on: windows-2022
 
     steps:
     - name: Checkout repository
