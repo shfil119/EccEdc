@@ -33,7 +33,7 @@ jobs:
 
             echo '=== 4. Download and Install Modern Ninja (v1.11.1) ==='
             # Pobieramy oficjalne binarne wydanie Ninja, które bez problemu działa na Ubuntu 14.04
-            wget https://github.com
+            wget https://github.com/ninja-build/ninja/releases/download/v1.13.2/ninja-linux.zip
             unzip ninja-linux.zip -d /usr/local/bin/
             chmod +x /usr/local/bin/ninja
 
