@@ -1,0 +1,57 @@
+name: Windows XP 32bit
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-for-xp:
+    # Use a specific, stable modern Ubuntu release as the host runner
+    runs-on: ubuntu-24.04
+
+    steps:
+      # STEP 1: Fetch source code on the host environment
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      # STEP 2: Isolate compilation tasks inside a safe legacy container
+      - name: Compile Inside Safe Container
+        run: |
+          docker run --rm -v "${{ github.workspace }}:/work" -w /work ubuntu:14.04 /bin/bash -c "
+            echo '=== 1. Configure UTF-8 Locale ==='
+            apt-get update
+            apt-get install -y locales
+            locale-gen en_US.UTF-8
+            export LANG=en_US.UTF-8
+            export LC_ALL=en_US.UTF-8
+
+            echo '=== 2. Install Core Build Tools ==='
+            apt-get install -y build-essential mingw-w64 python3 git wget unzip
+
+            echo '=== 3. Download and Install Modern Ninja (v1.5.3) ==='
+            wget https://github.com/ninja-build/ninja/releases/download/v1.5.3/ninja-linux.zip
+            unzip ninja-linux.zip -d /usr/local/bin/
+            chmod +x /usr/local/bin/ninja
+            ninja --version
+
+            echo '=== 4. Download and Install Meson 0.44.1 via wget ==='
+            # Download the source archive directly from GitHub releases
+            wget https://github.com/mesonbuild/meson/releases/download/0.44.1/meson-0.44.1.tar.gz
+            tar -xf meson-0.44.1.tar.gz
+
+            python3 meson-0.44.1/meson.py --version
+
+            echo '=== 5. Run Meson Setup ==='
+            python3 meson-0.44.1/meson.py setup builddir --cross-file mingw-cross.txt -Denable_xp_compat=true
+
+            echo '=== 6. Compile Using Native Ninja ==='
+            ninja -C builddir
+          "
+
+      # STEP 3: Save the generated Windows executable file as a workflow artifact
+      - name: Upload Windows XP Binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-xp-meson-binary
+          path: builddir/*.exe

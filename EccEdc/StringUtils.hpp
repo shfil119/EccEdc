@@ -1,6 +1,8 @@
 #ifndef _STRING_UTILS_HPP_
 #define _STRING_UTILS_HPP_
 
+#include <string>
+
 namespace StringUtils {
 	BOOL startsWith(const std::wstring & str, const std::wstring & lookFor);
 	BOOL startsWith(const std::string & str, const std::string & lookFor);

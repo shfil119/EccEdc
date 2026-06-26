@@ -14,9 +14,13 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 ////////////////////////////////////////////////////////////////////////////////
+#include <cassert>
 #ifdef _WIN32
+#include <windows.h>
 #include "StringUtils.hpp"
 #include "FileUtils.hpp"
+#elif defined(__linux__)
+#include "_linux/defineForLinux.h"
 #endif
 #include "Enum.h"
 #include "_external/ecm.h"
@@ -105,7 +109,7 @@ VOID OutputLastErrorNumAndString(
 
 	LocalFree(lpMsgBuf);
 #else
-	OutputErrorString("[F:%s][L:%lu] GetLastError: %lu, %s\n",
+	OutputErrorString("[F:%s][L:%lu] GetLastError: %d, %s\n",
 		pszFuncName, lLineNum, GetLastError(), strerror(GetLastError()));
 #endif
 }

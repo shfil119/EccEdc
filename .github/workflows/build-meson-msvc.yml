@@ -1,0 +1,47 @@
+name: Build and Pack (Meson + MSVC)
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-msvc-x64:
+    name: Windows (Meson + MSVC x64)
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v5
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'
+
+    - name: Install Meson and Ninja
+      run: pip install meson ninja
+
+    # This action correctly initializes the full MSVC x64 environment
+    # (replaces old, error-prone manual path calling or vcvars.bat)
+    - name: Initialize MSVC Developer Command Prompt
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: x64
+
+    # Setup build directory and compile using Ninja backend
+    - name: Configure and Build
+      run: |
+        meson setup build_x64 --buildtype=debugoptimized --backend=ninja
+        meson compile -C build_x64
+
+    # Pack the resulting native executable and symbol files into a ZIP
+    - name: Pack Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: EccEdc-Windows-MSVC-Meson-x64
+        path: |
+          build_x64/*.exe
+          build_x64/*.pdb
+          README.md

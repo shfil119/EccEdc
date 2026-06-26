@@ -21,6 +21,7 @@
 #include "ecm.h"
 #ifdef __linux__
 #pragma GCC diagnostic ignored "-Wconversion"
+#include <cstddef>
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////
