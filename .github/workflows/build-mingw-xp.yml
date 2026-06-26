@@ -1,49 +1,37 @@
-name: Build for Windows XP
-
-on:
-  push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
+name: Build Windows XP App with Meson
+on: [push, pull_request]
 
 jobs:
   build-for-xp:
-    # Using a specific Ubuntu LTS release version instead of 'latest' to guarantee reproducibility
+    # 1. Hostem jest nowoczesne i wspierane Ubuntu LTS
     runs-on: ubuntu-24.04
 
-    # Isolate the compilation inside a legacy container to guarantee std::thread support for XP
-    container:
-      image: ubuntu:14.04
-
     steps:
-
-      # STEP 2: Install MinGW cross-compiler, Python 3, and Pip (required by Meson)
-      - name: Install Build Tools and Dependencies
-        run: |
-          apt-get update
-          apt-get install -y build-essential mingw-w64 git python3-pip ninja-build
-
-      # STEP 3: Install a legacy version of Meson compatible with Python 3.4
-      - name: Install Meson Build System
-        run: |
-          pip3 install 'meson==0.44.1'
-          meson --version
-
-      # STEP 4: Pull the source code from your repository
+      # KROK 1: Pobieramy kod na hoście (Działa w 100% stabilnie)
       - name: Checkout Source Code
         uses: actions/checkout@v4
 
-      # STEP 5: Configure and build the project using Meson cross-compilation
-      - name: Configure and Build with Meson
+      # KROK 2: Kompilacja w kontenerze Ubuntu 14.04 przy użyciu Dockera.
+      # Wszystkie operacje (Apt, Pip, Meson) zamykamy w jednym bloku dockerowym.
+      - name: Compile Inside Safe Container
         run: |
-          meson setup builddir -Denable_xp_compat=true --cross-file cross-mingw.txt --buildtype=debugoptimized
-          meson compile -C builddir
+          docker run --rm -v "${{ github.workspace }}:/work" -w /work ubuntu:14.04 /bin/bash -c "
+            echo '=== 2. Install Build Tools ==='
+            apt-get update
+            apt-get install -y build-essential mingw-w64 python3-pip ninja-build
 
-      # STEP 6: Save the generated executable as a downloadable GitHub artifact
+            echo '=== 3. Install Meson 0.44.1 (Python 3.4 compatible) ==='
+            pip3 install 'meson==0.44.1'
+
+            echo '=== 4. Run Meson Setup and Compile ==='
+            # Flaga --reconfigure pozwala na czyszczenie katalogu przy ponownych buildach
+            meson setup builddir --cross-file cross-mingw.txt -Denable_xp_compat=true
+            meson compile -C builddir
+          "
+
+      # KROK 3: Zapisanie pliku .exe (Wykonuje się na hoście z folderu builddir)
       - name: Upload Windows XP Binary
         uses: actions/upload-artifact@v4
         with:
           name: windows-xp-meson-binary
-          path: |
-            builddir/*.exe
-            README.md
+          path: builddir/*.exe
