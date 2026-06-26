@@ -20,8 +20,6 @@ jobs:
         run: |
           docker run --rm -v "${{ github.workspace }}:/work" -w /work ubuntu:14.04 /bin/bash -c "
 
-            sed -i 's|http://archive.ubuntu.com|http://old-releases.ubuntu.com|g' /etc/apt/sources.list
-
             echo '=== 2. Configure UTF-8 Locale ==='
             apt-get update
             apt-get install -y locales
