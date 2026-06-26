@@ -1,0 +1,93 @@
+name: Build and Pack Assets (MSBuild - Debug Configuration)
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  # =========================================================================
+  # 1. JOB: NATIVE MSVC COMPILATION (64-BIT / x64)
+  # =========================================================================
+  build-msvc-x64:
+    name: Windows (MSVC - x64 Debug)
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v5
+
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v4
+
+    # Using Configuration=Debug for 64-bit architecture
+    - name: Build with MSVC (Debug x64)
+      run: msbuild EccEdc.sln /p:Configuration=Debug /p:Platform=x64
+
+    # Packaging artifacts from the x64/Debug/ folder
+    - name: Pack MSVC x64 Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: EccEdc-Windows-MSVC-x64-Debug
+        path: |
+          x64/Debug/*.exe
+          x64/Debug/*.pdb
+          README.md
+
+  # =========================================================================
+  # 2. JOB: NATIVE MSVC COMPILATION (32-BIT / x86)
+  # =========================================================================
+  build-msvc-x86:
+    name: Windows (MSVC - x86 Debug)
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v5
+
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v4
+
+    # Using Configuration=Debug for 32-bit architecture
+    - name: Build with MSVC (Debug x86)
+      run: msbuild EccEdc.sln /p:Configuration=Debug /p:Platform=x86
+
+    # Packaging artifacts from the root Debug/ folder for x86
+    - name: Pack MSVC x86 Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: EccEdc-Windows-MSVC-x86-Debug
+        path: |
+          Debug/*.exe
+          Debug/*.pdb
+          README.md
+
+  # =========================================================================
+  # 3. JOB: CLANG-CL COMPILATION WITH ASAN + UBSAN
+  # =========================================================================
+  build-clang-cl:
+    name: Windows (Clang-CL - x64 Debug)
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v5
+
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v4
+
+    # Using Configuration=Debug, overriding the toolset to Clang, and passing Sanitizers
+    - name: Build with Clang-CL (Sanitizers + Debug x64)
+      run: |
+        msbuild EccEdc.sln /p:Configuration=Debug /p:Platform=x64 /p:PlatformToolset=LLVM_v143_clangcl /p:AdditionalOptions="-fsanitize=address -fsanitize=undefined"
+
+    # Packaging artifacts from the x64/Debug/ folder for Clang
+    - name: Pack Clang-CL Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: EccEdc-Windows-ClangCL-Sanitizers-x64-Debug
+        path: |
+          x64/Debug/*.exe
+          x64/Debug/*.pdb
+          README.md
