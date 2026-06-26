@@ -19,9 +19,6 @@ jobs:
       - name: Compile Inside Safe Container
         run: |
           docker run --rm -v "${{ github.workspace }}:/work" -w /work ubuntu:14.04 /bin/bash -c "
-            echo '=== 1. Fix Legacy Repositories ==='
-            sed -i 's/://ubuntu.com' /etc/apt/sources.list
-            sed -i 's/://ubuntu.com' /etc/apt/sources.list
 
             echo '=== 2. Configure UTF-8 Locale ==='
             apt-get update
@@ -30,20 +27,27 @@ jobs:
             export LANG=en_US.UTF-8
             export LC_ALL=en_US.UTF-8
 
-            echo '=== 3. Install Build Tools ==='
-            apt-get install -y build-essential mingw-w64 python3-pip ninja-build
+            echo '=== 3. Install Core Build Tools ==='
+            # Instalujemy podstawy (unzip i wget będą potrzebne do pobrania nowej wersji Ninja)
+            apt-get install -y build-essential mingw-w64 python3-pip git wget unzip
 
-            # Tworzymy link symboliczny, aby stary Meson widział komendę 'ninja'
-            ln -sf /usr/bin/ninja-build /usr/bin/ninja
+            echo '=== 4. Download and Install Modern Ninja (v1.11.1) ==='
+            # Pobieramy oficjalne binarne wydanie Ninja, które bez problemu działa na Ubuntu 14.04
+            wget https://github.com
+            unzip ninja-linux.zip -d /usr/local/bin/
+            chmod +x /usr/local/bin/ninja
 
-            echo '=== 4. Install Meson 0.44.1 ==='
+            # Weryfikacja wersji (zwróci 1.11.1, co w pełni zadowoli Mesona)
+            ninja --version
+
+            echo '=== 5. Install Meson 0.44.1 ==='
             pip3 install 'meson==0.44.1'
 
-            echo '=== 5. Run Meson Setup ==='
+            echo '=== 6. Run Meson Setup ==='
+            # Teraz konfiguracja przejdzie pomyślnie, bo wykryje Ninja 1.11.1
             meson setup builddir --cross-file mingw-cross.txt -Denable_xp_compat=true
 
-            echo '=== 6. Compile Using Native Ninja ==='
-            # W wersji Meson 0.44.1 kompilację uruchamia się bezpośrednio przez program ninja
+            echo '=== 7. Compile Using Native Ninja ==='
             ninja -C builddir
           "
 
