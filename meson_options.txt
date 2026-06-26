@@ -1,0 +1,5 @@
+option('enable_xp_compat', 
+       type: 'boolean', 
+       value: false, 
+       description: 'Enable strict compatibility for Windows XP'
+)

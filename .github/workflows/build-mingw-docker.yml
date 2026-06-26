@@ -1,0 +1,49 @@
+name: Build with MinGW in Docker (Meson)
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-mingw-docker:
+    name: Linux Docker (MinGW x64 - Meson)
+    runs-on: ubuntu-latest
+
+    # We run the entire job inside a clean Linux container with pre-installed MinGW
+    container:
+      image: fedora:40
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v5
+
+    # Install compiler, build tools, meson, and ninja inside the container
+    - name: Install Build Dependencies
+      run: |
+        dnf install -y \
+          mingw64-gcc \
+          mingw64-gcc-c++ \
+          meson \
+          ninja-build \
+          git
+
+    # Configure the build folder using the cross-compilation configuration file
+    - name: Configure Project with Meson
+      run: |
+        meson setup build_mingw --cross-file mingw-cross.txt --buildtype=debugoptimized
+
+    # Compile the project into a native Windows executable (.exe)
+    - name: Compile Project
+      run: |
+        meson compile -C build_mingw
+
+    # Pack and upload the resulting .exe file from the Linux container
+    - name: Pack MinGW Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: EccEdc-Windows-MinGW-Docker-x64
+        path: |
+          build_mingw/*.exe
+          README.md

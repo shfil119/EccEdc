@@ -1,3 +1,4 @@
+#include "defineForLinux.h"
 
 // https://groups.google.com/forum/#!topic/gnu.gcc.help/0dKxhmV4voE
 // Abstract:   split a path into its parts
