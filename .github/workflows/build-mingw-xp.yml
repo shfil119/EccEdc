@@ -19,7 +19,7 @@ jobs:
       # STEP 1: Point apt to ://ubuntu.com since Ubuntu 14.04 is End-of-Life
       - name: Fix Legacy Repositories
         run: |
-          sed -i -re 's/([a-z]{2}\.)?://ubuntu.com|security.ubuntu.com/://ubuntu.com/g' /etc/apt/sources.list
+          sed 's/ubuntu.com|security.ubuntu.com/old-releases.ubuntu.com/' /etc/apt/sources.list
 
       # STEP 2: Install MinGW cross-compiler, Python 3, and Pip (required by Meson)
       - name: Install Build Tools and Dependencies
